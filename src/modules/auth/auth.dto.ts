@@ -1,3 +1,4 @@
+
 import { GENDER } from "../../utils/common/enum/index.js";
 
 export interface RegisterDTO {
@@ -11,4 +12,18 @@ export interface RegisterDTO {
 export interface LoginDTO {
   email: string;
   password: string;
+}
+
+export interface GoogleDTO {
+  idToken: string;
+}
+export interface GooglePayloadDTO {
+  name: string;
+  email: string;
+  picture?: string;
+}
+
+export interface VerifyAccountDTO {
+  email: string;
+  otp:string
 }

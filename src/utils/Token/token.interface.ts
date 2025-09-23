@@ -1,7 +1,7 @@
 import {type SignOptions } from "jsonwebtoken";
 
 export interface TokenProps {
-  payload: string | object | Buffer;
+  payload: object;
   secretKey?: string;
   options?: SignOptions;
 }

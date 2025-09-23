@@ -13,4 +13,5 @@ export class UserEntity {
       userAgent!: USER_AGENT;
       otp?: string;
       otpExpire?: Date;
+      isVerify!:boolean;
 }

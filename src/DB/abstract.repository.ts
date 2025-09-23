@@ -25,7 +25,7 @@ export abstract class AbstractRepository<T> {
   update(
     filter: RootFilterQuery<T>,
     update: UpdateQuery<T>,
-    option: MongooseUpdateQueryOptions<T>
+    option?: MongooseUpdateQueryOptions<T>
   ) {
     return this.model.updateOne(filter, update, option);
   }
