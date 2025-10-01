@@ -1,6 +1,6 @@
 
-import { BadRequestException, NotFoundException } from '../../utils/error/index.js';
-import { UserRepository } from './../../DB/user/user.repository';
+import { BadRequestException, NotFoundException } from '../../utils';
+import { UserRepository } from './../../DB';
 import { VerifyAccountDTO } from './auth.dto';
 export const authProvider = {
   async checkOtp(verifyAccountDTO: VerifyAccountDTO) {

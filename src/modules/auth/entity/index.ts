@@ -1,4 +1,4 @@
-import { GENDER, SYS_ROLE, USER_AGENT } from "../../../utils/common/enum/index.js";
+import { GENDER, SYS_ROLE, USER_AGENT } from "../../../utils";
 
 export class UserEntity {
     firstName!: string;

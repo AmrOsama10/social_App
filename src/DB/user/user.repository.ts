@@ -1,5 +1,5 @@
 
-import { IUser } from "../../utils/common/interface/index.js";
+import { IUser } from "../../utils";
 import { AbstractRepository } from "../abstract.repository.js";
 import { User } from "./user.model.js";
 

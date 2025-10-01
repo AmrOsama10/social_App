@@ -1,9 +1,6 @@
-import { SYS_ROLE, USER_AGENT } from "../../../utils/common/enum/index.js";
-import { generateHash } from "../../../utils/hash/index.js";
-import { generateOtp, generateOtpExpire } from "../../../utils/OTP/index.js";
-import { sendEmail } from "../../../utils/sendEmail/index.js";
+import { generateHash, generateOtp, generateOtpExpire, sendEmail, SYS_ROLE, USER_AGENT } from "../../../utils";
 import { GooglePayloadDTO, RegisterDTO } from "../auth.dto.js";
-import { UserEntity } from "../entity/index.js";
+import { UserEntity } from "../entity";
 
 export class AuthFactoryService {
   register(registerDTO: RegisterDTO) {

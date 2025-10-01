@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { GENDER } from "../../utils/common/enum/index.js";
-import { LoginDTO, RegisterDTO, VerifyAccountDTO } from "./auth.dto.js";
+import { GENDER } from "../../utils";
+import { ForgetPasswordDTO, LoginDTO, RegisterDTO, SendOtpDTO, VerifyAccountDTO } from "./auth.dto.js";
 export const registerSchema = z.object<RegisterDTO>({
   fullName: z.string().min(3).max(20) as unknown as string,
   email: z.email() as unknown as string,
@@ -17,4 +17,14 @@ export const loginSchema = z.object<LoginDTO>({
 export const verifyAccountSchema = z.object<VerifyAccountDTO>({
   email:z.email() as unknown as string,
   otp:z.string().length(5) as unknown as string
+})
+
+export const forgetPasswordSchema = z.object<ForgetPasswordDTO>({
+  email: z.email() as unknown as string,
+  otp: z.string().length(5) as unknown as string,
+  newPassword: z.string() as unknown as string,
+});
+
+export const sendOtpSchema= z.object<SendOtpDTO>({
+  email:z.email() as unknown as string
 })

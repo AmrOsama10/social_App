@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express"
-import { BadRequestException } from "../utils/error/index.js";
+import { BadRequestException } from "../utils";
 import { ZodType } from "zod";
 
 

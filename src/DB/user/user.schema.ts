@@ -1,8 +1,5 @@
 import { Schema } from "mongoose";
-import { IUser } from "../../utils/common/interface/index.js";
-import { GENDER, SYS_ROLE, USER_AGENT } from "../../utils/common/enum/index.js";
-;
-
+import { GENDER, IUser, SYS_ROLE, USER_AGENT } from "../../utils";
 export const userSchema = new Schema<IUser>(
   {
     firstName: {
@@ -34,31 +31,30 @@ export const userSchema = new Schema<IUser>(
         return true;
       },
       minLength: 8,
-
     },
     phoneNumber: {
       type: String,
     },
     credentialUpdatedAt: Date,
     role: {
-      type: String,
+      type: Number,
       enum: SYS_ROLE,
       default: SYS_ROLE.user,
     },
     gender: {
-      type: String,
+      type: Number,
       enum: GENDER,
     },
     userAgent: {
-      type: String,
+      type: Number,
       enum: USER_AGENT,
     },
     otp: { type: String },
     otpExpire: { type: Date },
-    isVerify:{
-      type:Boolean,
-      default:false
-    }
+    isVerify: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
