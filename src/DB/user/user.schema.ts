@@ -35,7 +35,9 @@ export const userSchema = new Schema<IUser>(
     phoneNumber: {
       type: String,
     },
-    credentialUpdatedAt: Date,
+
+    credentialUpdatedAt: { type: Date, default: Date.now() },
+
     role: {
       type: Number,
       enum: SYS_ROLE,
@@ -55,6 +57,8 @@ export const userSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+    pendingEmail: { type: String },
+    twoStepEnabled: { type: Boolean, default: false },
   },
   {
     timestamps: true,

@@ -8,5 +8,6 @@ router.use("/:postId/comment/",commentRouter)
 router.post("/",isAuthenticate(),postService.create)
 router.patch("/:id",isAuthenticate(),postService.addReaction)
 router.get("/:id",isAuthenticate(),postService.getSpecific)
+router.delete("/:id",isAuthenticate(),postService.deletePost)
 
 export default router

@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { CreatePostDTO } from "./post.dto.js";
 import { PostFactoryService } from "./factory";
 import { PostRepository } from "../../DB";
-import { NotFoundException } from "../../utils";
+import { NotAuthorizedException, NotFoundException } from "../../utils";
 
 class PostServices {
   private readonly postFactoryService = new PostFactoryService();
@@ -57,7 +57,7 @@ class PostServices {
     return res.sendStatus(204);
   };
   getSpecific = async (req: Request, res: Response) => {
-    const {id} = req.params;
+    const { id } = req.params;
     const post = await this.postRepository.getOne(
       { _id: id },
       {},
@@ -65,14 +65,26 @@ class PostServices {
         populate: [
           { path: "userId", select: "fullName firstName lastName " },
           { path: "reactions.userId", select: "fullName firstName lastName" },
-          { path: "comments" ,match: { parentId: null } },
+          { path: "comments", match: { parentId: null } },
         ],
       }
     );
     if (!post) {
-      throw new NotFoundException("post not found")
+      throw new NotFoundException("post not found");
     }
-    return res.status(200).json({message:"done",success:true,data:{post}})
+    return res
+      .status(200)
+      .json({ message: "done", success: true, data: { post } });
+  };
+  deletePost = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const postExist = await this.postRepository.exist({ _id: id });
+    if (!postExist) throw new NotFoundException("post not found");
+    if (postExist.userId.toString() != req.user._id.toString()) {
+      throw new NotAuthorizedException("you are not authorized to delete post");
+    }
+    await this.postRepository.delete({ _id: id });
+    return res.sendStatus(204);
   };
 }
 

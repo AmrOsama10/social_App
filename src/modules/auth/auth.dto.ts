@@ -34,6 +34,21 @@ export interface ForgetPasswordDTO {
   newPassword:string;
 }
 
-export interface SendOtpDTO {
-  email:string
+
+export interface UpdatePasswordDTO {
+  oldPassword:string;
+  newPassword:string;
 }
+
+export interface UpdateInfoDTO {
+  firstName:string;
+  lastName:string;
+  gender:GENDER;
+  phoneNumber:string
+}
+
+export interface UpdateEmailDTO {
+  password:string;
+  newEmail:string
+}
+

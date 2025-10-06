@@ -1,9 +1,16 @@
 import { Request, Response } from "express";
-import { IComment, NotFoundException } from "../../utils";
+import {
+  BadRequestException,
+  IComment,
+  IPost,
+  NotAuthorizedException,
+  NotFoundException,
+} from "../../utils";
 import { CommentRepository } from "../../DB/comment/comment.repository.js";
 import { CommentFactory } from "./factory";
 import { CreateCommentDTO } from "./comment.dto";
 import { PostRepository } from "./../../DB/";
+import { ObjectId } from "mongoose";
 
 class CommentServices {
   constructor() {}
@@ -38,13 +45,30 @@ class CommentServices {
       { _id: id },
       {},
       {
-        populate: [
-          {path:"replies"}
-        ],
+        populate: [{ path: "replies" }],
       }
     );
-    if(!comment)throw new NotFoundException("comment not found")
-      return res.status(200).json({message:"done",success:true,data:{comment}})
+    if (!comment) throw new NotFoundException("comment not found");
+    return res
+      .status(200)
+      .json({ message: "done", success: true, data: { comment } });
+  };
+  deleteComment = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const commentExist = await this.commentRepository.exist({ _id: id },{},{
+      populate:[{path:"postId",select:"userId"}]
+    });
+    if (!commentExist) throw new NotFoundException("comment not found");
+    if (
+      commentExist.userId != req.user._id &&
+      (commentExist.postId as unknown as IPost).userId != req.user._id
+    ) {
+      throw new NotAuthorizedException(
+        "you are not authorized to delete comment"
+      );
+    }
+    await this.commentRepository.delete({ _id: id });
+    return res.sendStatus(204);
   };
 }
 

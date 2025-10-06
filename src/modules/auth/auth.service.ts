@@ -7,8 +7,10 @@ import {
   ConflictException,
   ForbiddenException,
   generateHash,
-  generateOtp, generateOtpExpire,
+  generateOtp,
+  generateOtpExpire,
   generateToken,
+  NotFoundException,
   sendEmail,
 } from "../../utils";
 import {
@@ -17,7 +19,9 @@ import {
   GooglePayloadDTO,
   LoginDTO,
   RegisterDTO,
-  SendOtpDTO,
+  UpdateEmailDTO,
+  UpdateInfoDTO,
+  UpdatePasswordDTO,
   VerifyAccountDTO,
 } from "./auth.dto";
 import { authProvider } from "./auth.provider.js";
@@ -61,11 +65,48 @@ class AuthServices {
       throw new ForbiddenException("invalid credentials");
     }
 
+    if (userExist.twoStepEnabled) {
+      await authProvider.sendOtp(loginDTO.email, userExist);
+      await userExist.save()
+      return res.status(200).json({
+        message: "require two step true",
+        success: true,
+        data: { userId: userExist._id },
+      });
+    } else {
+      const accessToken = generateToken({
+        payload: { _id: userExist._id },
+        options: { expiresIn: "15m" },
+      });
+
+      return res.status(200).json({
+        message: "done",
+        success: true,
+        data: { accessToken },
+      });
+    }
+  };
+
+  loginConfirm = async (req: Request, res: Response) => {
+    const { otp, userId } = req.body;
+    const user = await this.userRepository.getOne({
+      _id: userId,
+    });
+    if (!user) {
+      throw new NotFoundException("user not found");
+    }
+    authProvider.checkOtp(otp, user);
     const accessToken = generateToken({
-      payload: { _id: userExist._id },
+      payload: { _id: user._id },
       options: { expiresIn: "15m" },
     });
 
+    await this.userRepository.update(
+      { _id: user._id },
+      {
+        $unset: { otp: "", otpExpire: "" },
+      }
+    );
     return res.status(200).json({
       message: "done",
       success: true,
@@ -93,41 +134,140 @@ class AuthServices {
 
   verifyAccount = async (req: Request, res: Response) => {
     const verifyAccountDTO: VerifyAccountDTO = req.body;
-    await authProvider.checkOtp(verifyAccountDTO);
+    const userExist = await this.userRepository.exist({
+      email: verifyAccountDTO.email,
+    });
+    if (!userExist) {
+      throw new NotFoundException("user not found");
+    }
+    authProvider.checkOtp(verifyAccountDTO.otp, userExist);
     await this.userRepository.update(
       { email: verifyAccountDTO.email },
       { isVerify: true, $unset: { otp: "", otpExpire: "" } }
     );
+
     return res.sendStatus(204);
   };
 
-  sendOtp = async (req:Request,res:Response)=>{
-    const sendOtpDTO:SendOtpDTO = req.body;
-    const userExist = await this.userRepository.exist({email:sendOtpDTO.email});
-    if (!userExist) {
-      throw new ForbiddenException("invalid credential")
-    }
-    userExist.otp = generateOtp()
-    userExist.otpExpire = generateOtpExpire(5 * 60 * 60 * 1000);
-    await userExist.save()
-    
-    sendEmail({
-      to: sendOtpDTO.email,
-      html: `<h1>Your new OTP is ${userExist.otp}</h1>`,
-      subject: "Verify your email",
-    });
-    return res.sendStatus(204)
-  }
-
   forgetPassword = async (req: Request, res: Response) => {
     const forgetPasswordDTO: ForgetPasswordDTO = req.body;
-    await authProvider.checkOtp(forgetPasswordDTO);
+    authProvider.checkOtp(forgetPasswordDTO.otp);
     this.userRepository.update(
-      { password: generateHash(forgetPasswordDTO.newPassword) },
+      {
+        password: generateHash(forgetPasswordDTO.newPassword),
+        credentialUpdatedAt: Date.now(),
+      },
       { $unset: { otp: "", otpExpire: "" } }
     );
-    return res.sendStatus(204)
+    return res.sendStatus(204);
+  };
+
+  updatePassword = async (req: Request, res: Response) => {
+    const updatePasswordDTO: UpdatePasswordDTO = req.body;
+    const user = await this.userRepository.getOne({ _id: req.user._id });
+    if (!user) throw new ForbiddenException("invalid credentials");
+    const isMatch = compareHash(updatePasswordDTO.oldPassword, user.password);
+    if (!isMatch) throw new ForbiddenException("invalid credentials");
+
+    await this.userRepository.update(
+      { _id: req.user._id },
+      {
+        password: generateHash(updatePasswordDTO.newPassword),
+        credentialUpdatedAt: Date.now(),
+      }
+    );
+    return res.sendStatus(204);
+  };
+
+  updateInfo = async (req: Request, res: Response) => {
+    const updateInfoDTO: UpdateInfoDTO = req.body;
+    const newUser = await this.userRepository.update(
+      { _id: req.user._id },
+      {
+        firstName: updateInfoDTO.firstName,
+        lastName: updateInfoDTO.lastName,
+        gender: updateInfoDTO.gender,
+        phoneNumber: updateInfoDTO.phoneNumber,
+      }
+    );
+
+    return res
+      .status(200)
+      .json({ message: "user updated successfully", success: true });
+  };
+
+  updateEmail = async (req: Request, res: Response) => {
+    const updateEmailDTO: UpdateEmailDTO = req.body;
+    const user = await this.userRepository.getOne({ _id: req.user._id });
+    const isMatch = compareHash(updateEmailDTO.password, user.password);
+    if (!isMatch) throw new ForbiddenException("invalid credentials");
+    await authProvider.sendOtp(updateEmailDTO.newEmail, user);
+    user.pendingEmail = updateEmailDTO.newEmail;
+
+    await user.save();
+
+    return res.sendStatus(204);
+  };
+
+  verifyUpdateEmail = async (req: Request, res: Response) => {
+    const verifyAccountDTO: VerifyAccountDTO = req.body;
+    const user = await this.userRepository.getOne({
+      _id: req.user._id,
+    });
+    if (!user) {
+      throw new NotFoundException("user not found");
+    }
+    authProvider.checkOtp(verifyAccountDTO.otp, user);
+    await this.userRepository.update(
+      { _id: user._id },
+      {
+        email: user.pendingEmail,
+        credentialUpdatedAt: Date.now(),
+        $unset: { otp: "", otpExpire: "", pendingEmail: "" },
+      }
+    );
+
+    return res.sendStatus(204);
+  };
+
+  sendOtp = async (req: Request, res: Response) => {
+    const { email } = req.body;
+    const user = await this.userRepository.exist({
+      email,
+    });
+    if (!user) {
+      throw new ForbiddenException("invalid credential");
+    }
+    user.otp = generateOtp();
+    user.otpExpire = generateOtpExpire(3 * 60 * 1000);
+    await user.save();
+
+    sendEmail({
+      to: user.email,
+      html: `<h1>Your new OTP is ${user.otp}</h1>`,
+      subject: "Verify your email",
+    });
+    return res.sendStatus(204);
+  };
+
+  towStepVerification = async (req: Request, res: Response) => {
+    const { otp } = req.body;
+    const user = await this.userRepository.getOne({
+      _id: req.user._id,
+    });
+    if (!user) {
+      throw new NotFoundException("user not found");
+    }
+    authProvider.checkOtp(otp, user);
+    await this.userRepository.update(
+      { _id: user._id },
+      {
+        twoStepEnabled: true,
+        credentialUpdatedAt: Date.now(),
+        $unset:{otp:"",otpExpire:""}
+      }
+    );
+    return res.sendStatus(204);
   };
 }
-
 export default new AuthServices();

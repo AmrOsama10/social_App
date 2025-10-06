@@ -1,22 +1,40 @@
-
-import { BadRequestException, NotFoundException } from '../../utils';
-import { UserRepository } from './../../DB';
-import { VerifyAccountDTO } from './auth.dto';
+import {
+  BadRequestException,
+  ForbiddenException,
+  generateOtp,
+  generateOtpExpire,
+  IUser,
+  sendEmail,
+} from "../../utils";
+import { UserRepository } from "./../../DB";
 export const authProvider = {
-  async checkOtp(verifyAccountDTO: VerifyAccountDTO) {
-    const userRepository = new UserRepository();
-    const userExist = await userRepository.exist({
-      email: verifyAccountDTO.email,
-    });
-    if (!userExist) {
-      throw new NotFoundException("user not found");
-    }
-    if (!userExist.otp || !userExist.otpExpire) {
+  checkOtp(otp:string,user?:IUser) {
+    
+    if (!user.otp || !user.otpExpire) {
       throw new BadRequestException("otp not found");
     }
-    if (userExist.otp != verifyAccountDTO.otp)
+    if (user.otp != otp)
       throw new BadRequestException("invalid otp");
-    if (userExist.otpExpire < new Date())
+    if (user.otpExpire < new Date())
       throw new BadRequestException("expire otp");
+  },
+
+  async sendOtp(email:string,user:IUser) {
+    const userRepository = new UserRepository();
+    const userExist = await userRepository.exist({
+      email
+    });
+    if (!userExist) {
+      throw new ForbiddenException(
+        "If this email is eligible, you will receive a verification code shortly"
+      );
+    }
+    user.otp = generateOtp();
+    user.otpExpire = generateOtpExpire(3 * 60 * 1000);
+    sendEmail({
+      to: email,
+      html: `<h1>Your new OTP is ${user.otp}</h1>`,
+      subject: "Verify your email",
+    });
   },
 };

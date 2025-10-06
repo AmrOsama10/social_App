@@ -6,30 +6,31 @@ export abstract class AbstractRepository<T> {
     const doc = new this.model(item);
     return await doc.save();
   }
-  exist(
+   async exist(
     filter: RootFilterQuery<T>,
     projection?: ProjectionType<T>,
     option?: QueryOptions<T>
   ) {
-    return this.model.findOne(filter, projection, option);
+    return await this.model.findOne(filter, projection, option);
   }
 
-  getOne(
+ async getOne(
     filter: RootFilterQuery<T>,
     projection?: ProjectionType<T>,
     option?: QueryOptions<T>
   ) {
-    return this.model.findOne(filter, projection, option);
+    return await this.model.findOne(filter, projection, option);
   }
 
-  update(
+   async update(
     filter: RootFilterQuery<T>,
     update: UpdateQuery<T>,
     option?: MongooseUpdateQueryOptions<T>
   ) {
-    return this.model.updateOne(filter, update, option);
+    return await this.model.updateOne(filter, update, option);
   }
-  delete(filter: RootFilterQuery<T>) {
-    this.model.deleteOne(filter);
+  async delete(filter: RootFilterQuery<T>) {
+    return await this.model.deleteOne(filter);
+
   }
 }

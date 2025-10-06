@@ -31,6 +31,7 @@ export function bootstrap(app: Express, express: any) {
       return res.status(error.statusCode || 400).json({
         message: error.message,
         status: false,
+        stack:error.stack,
         errorDetails: error.errorDetails,
       });
     }

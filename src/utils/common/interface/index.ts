@@ -15,6 +15,8 @@ export interface IUser {
   otp?: string;
   otpExpire?: Date;
   isVerify: boolean;
+  pendingEmail:string;
+  twoStepEnabled:boolean;
 }
 
 export interface IUser {
