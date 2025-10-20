@@ -1,21 +1,32 @@
 export enum SYS_ROLE {
-    user,
-    admin,
-    superAdmin
+  user,
+  admin,
+  superAdmin,
 }
 export enum GENDER {
-    male,
-    female
+  male,
+  female,
 }
 export enum USER_AGENT {
-    local,
-    googl
+  local,
+  googl,
 }
 
 export enum REACTION {
-    like,
-    love,
-    care,
-    sad,
-    angry
+  like,
+  love,
+  care,
+  sad,
+  angry,
+}
+
+export enum STATUS {
+  active,
+  frozen,
+  deleted,
+}
+
+export enum USER_RELATION {
+  normal,
+  blocked,
 }

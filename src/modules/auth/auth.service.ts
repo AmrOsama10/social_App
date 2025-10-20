@@ -71,7 +71,6 @@ class AuthServices {
       return res.status(200).json({
         message: "require two step true",
         success: true,
-        data: { userId: userExist._id },
       });
     } else {
       const accessToken = generateToken({
@@ -80,7 +79,7 @@ class AuthServices {
       });
 
       return res.status(200).json({
-        message: "done",
+        message: "Done",
         success: true,
         data: { accessToken },
       });
@@ -88,14 +87,14 @@ class AuthServices {
   };
 
   loginConfirm = async (req: Request, res: Response) => {
-    const { otp, userId } = req.body;
+    const verifyAccountDTO:VerifyAccountDTO = req.body;
     const user = await this.userRepository.getOne({
-      _id: userId,
+      email:verifyAccountDTO.email,
     });
     if (!user) {
       throw new NotFoundException("user not found");
     }
-    authProvider.checkOtp(otp, user);
+    authProvider.checkOtp(verifyAccountDTO.otp, user);
     const accessToken = generateToken({
       payload: { _id: user._id },
       options: { expiresIn: "15m" },

@@ -1,5 +1,5 @@
 import { Schema } from "mongoose";
-import { IComment } from "../../utils";
+import { IComment, STATUS } from "../../utils";
 import { reactionSchema } from "../common";
 
 export const commentSchema = new Schema<IComment>(
@@ -18,10 +18,10 @@ export const commentSchema = new Schema<IComment>(
       type: Schema.Types.ObjectId,
       ref: "Comment",
       // required:true
-
     },
     content: { type: String },
     reactions: [reactionSchema],
+    status: { type: Number, enum: STATUS, default: STATUS.active },
     // attachment:
     // mentions:
   },

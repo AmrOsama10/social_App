@@ -1,6 +1,6 @@
-import { z } from "zod";
+import { email, z } from "zod";
 import { GENDER } from "../../utils";
-import { ForgetPasswordDTO, LoginDTO, RegisterDTO,   VerifyAccountDTO } from "./auth.dto.js";
+import { ForgetPasswordDTO, LoginDTO, RegisterDTO,   UpdateEmailDTO,   UpdateInfoDTO,   UpdatePasswordDTO,   VerifyAccountDTO } from "./auth.dto.js";
 export const registerSchema = z.object<RegisterDTO>({
   fullName: z.string().min(3).max(20) as unknown as string,
   email: z.email() as unknown as string,
@@ -25,8 +25,24 @@ export const forgetPasswordSchema = z.object<ForgetPasswordDTO>({
   newPassword: z.string() as unknown as string,
 });
 
+export const sendOtpSchema = z.object({
+  email:z.email() as unknown as string
+})
 
+export const updatePasswordSchema = z.object<UpdatePasswordDTO>({
+  oldPassword:z.string() as unknown as string,
+  newPassword:z.string() as unknown  as string
+});
 
-// export const updatePasswordSchema = z.object<UpdatePasswordDTO>({
-//   oldPassword: z.string() as unknown as string,
-// });
+export const updateInfoSchema = z.object<UpdateInfoDTO>({
+  firstName:z.string().min(3).max(20) as unknown as string,
+  gender:z.enum(GENDER) as unknown as GENDER,
+  lastName:z.string().min(3).max(20) as unknown as string ,
+  phoneNumber:z.string() as unknown as string
+})
+
+export const updateEmailSchema = z.object<UpdateEmailDTO>({
+  newEmail:z.email() as unknown as string ,
+  password:z.string() as unknown as string
+})
+

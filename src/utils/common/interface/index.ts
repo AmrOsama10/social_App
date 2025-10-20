@@ -1,5 +1,12 @@
 import { ObjectId } from "mongoose";
-import { GENDER, REACTION, SYS_ROLE, USER_AGENT } from "../enum";
+import {
+  USER_RELATION,
+  GENDER,
+  REACTION,
+  STATUS,
+  SYS_ROLE,
+  USER_AGENT,
+} from "../enum";
 
 export interface IUser {
   firstName: string;
@@ -15,8 +22,12 @@ export interface IUser {
   otp?: string;
   otpExpire?: Date;
   isVerify: boolean;
-  pendingEmail:string;
-  twoStepEnabled:boolean;
+  pendingEmail: string;
+  twoStepEnabled: boolean;
+  userRelation: USER_RELATION;
+  friends: ObjectId[];
+  friendRequests: ObjectId[];
+  userBlock:ObjectId[]
 }
 
 export interface IUser {
@@ -45,6 +56,7 @@ export interface IPost {
   content: string;
   reactions: IReaction[];
   attachment?: IAttachment[];
+  status:STATUS
 }
 
 export interface IAttachment {
@@ -61,4 +73,15 @@ export interface IComment {
   reactions: IReaction[];
   attachment?: IAttachment[];
   mentions?: ObjectId[];
+  status: STATUS;
+}
+
+export interface IMessage {
+  content:string;
+  sender:ObjectId;
+}
+
+export interface IChat {
+  messages:ObjectId[];
+  users:ObjectId[];
 }

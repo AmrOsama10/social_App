@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { CreatePostDTO } from "./post.dto.js";
 import { PostFactoryService } from "./factory";
 import { PostRepository } from "../../DB";
-import { NotAuthorizedException, NotFoundException } from "../../utils";
+import { NotAuthorizedException, NotFoundException, STATUS } from "../../utils";
 
 class PostServices {
   private readonly postFactoryService = new PostFactoryService();
@@ -69,7 +69,7 @@ class PostServices {
         ],
       }
     );
-    if (!post) {
+    if (!post||post.status!==STATUS.active) {
       throw new NotFoundException("post not found");
     }
     return res
@@ -85,6 +85,30 @@ class PostServices {
     }
     await this.postRepository.delete({ _id: id });
     return res.sendStatus(204);
+  };
+  freeze = async (req: Request, res: Response) => {
+        const { id } = req.params;
+        const post = await this.postRepository.exist({ _id: id });
+        if (!post) throw new NotFoundException("post not found");
+        if (post.userId.toString() != req.user._id.toString()) {
+          throw new NotAuthorizedException(
+            "you are not authorized to update post"
+          );
+        }
+        await this.postRepository.update({ _id: id }, { status:STATUS.frozen });
+        return res.status(204).json({ message: "done", success: true });
+  };
+
+  update = async (req: Request, res: Response) => {
+    const { content } = req.body;
+    const { id } = req.params;
+    const post = await this.postRepository.exist({ _id: id });
+    if (!post) throw new NotFoundException("post not found");
+    if (post.userId.toString() != req.user._id.toString()) {
+      throw new NotAuthorizedException("you are not authorized to update post");
+    }
+    await this.postRepository.update({ _id: id }, { content });
+    return res.status(204).json({ message: "done", success: true });
   };
 }
 

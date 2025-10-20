@@ -20,17 +20,38 @@ router.patch(
   isValid(authValidation.forgetPasswordSchema),
   authService.forgetPassword
 );
-router.post("/send-otp",isAuthenticate(), authService.sendOtp);
+router.post(
+  "/send-otp",
+  isValid(authValidation.sendOtpSchema),
+  isAuthenticate(),
+  authService.sendOtp
+);
 
-router.patch("/update-password", isAuthenticate(), authService.updatePassword);
+router.patch(
+  "/update-password",
+  isValid(authValidation.updatePasswordSchema),
+  isAuthenticate(),
+  authService.updatePassword
+);
 
-router.patch("/update-info", isAuthenticate(), authService.updateInfo);
+router.patch(
+  "/update-info",
+  isValid(authValidation.updateInfoSchema),
+  isAuthenticate(),
+  authService.updateInfo
+);
 
-router.patch("/update-email", isAuthenticate(), authService.updateEmail);
+router.patch(
+  "/update-email",
+  isValid(authValidation.updateEmailSchema),
+  isAuthenticate(),
+  authService.updateEmail
+);
 
 router.post(
   "/verify-new-email",
   isAuthenticate(),
+  isValid(authValidation.verifyAccountSchema),
   authService.verifyUpdateEmail
 );
 router.post(
@@ -38,6 +59,10 @@ router.post(
   isAuthenticate(),
   authService.towStepVerification
 );
-router.post("/login-confirm", authService.loginConfirm);
+router.post(
+  "/login-confirm",
+  isValid(authValidation.verifyAccountSchema),
+  authService.loginConfirm
+);
 
 export default router;

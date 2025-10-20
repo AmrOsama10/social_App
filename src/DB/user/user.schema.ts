@@ -1,5 +1,11 @@
 import { Schema } from "mongoose";
-import { GENDER, IUser, SYS_ROLE, USER_AGENT } from "../../utils";
+import {
+  USER_RELATION,
+  GENDER,
+  IUser,
+  SYS_ROLE,
+  USER_AGENT,
+} from "../../utils";
 export const userSchema = new Schema<IUser>(
   {
     firstName: {
@@ -59,6 +65,14 @@ export const userSchema = new Schema<IUser>(
     },
     pendingEmail: { type: String },
     twoStepEnabled: { type: Boolean, default: false },
+    userRelation: {
+      type: Number,
+      enum: USER_RELATION,
+      default: USER_RELATION.normal,
+    },
+    friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    friendRequests: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    userBlock:[{type:Schema.Types.ObjectId,ref:"User"}]
   },
   {
     timestamps: true,
