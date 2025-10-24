@@ -6,6 +6,7 @@ import {
   STATUS,
   SYS_ROLE,
   USER_AGENT,
+  USER_STATUSES,
 } from "../enum";
 
 export interface IUser {
@@ -28,6 +29,7 @@ export interface IUser {
   friends: ObjectId[];
   friendRequests: ObjectId[];
   userBlock:ObjectId[]
+  userStatues:USER_STATUSES
 }
 
 export interface IUser {

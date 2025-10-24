@@ -21,6 +21,13 @@ export abstract class AbstractRepository<T> {
   ) {
     return await this.model.findOne(filter, projection, option);
   }
+ async getAll(
+    filter: RootFilterQuery<T>,
+    projection?: ProjectionType<T>,
+    option?: QueryOptions<T>
+  ) {
+    return await this.model.find(filter, projection, option);
+  }
 
    async update(
     filter: RootFilterQuery<T>,

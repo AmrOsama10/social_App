@@ -30,3 +30,8 @@ export enum USER_RELATION {
   normal,
   blocked,
 }
+
+export enum USER_STATUSES {
+  online,
+  offline
+}

@@ -6,7 +6,10 @@ import userRouter from "./modules/user/user.controller.js";
 import commentRouter from "./modules/comment/comment.controller.js";
 import { AppError } from "./utils/error/index.js";
 import chatRouter from "./modules/chat/chat.controller.js"
+import { createHandler } from "graphql-http/lib/use/express";
+import { schema } from "./app.schema.js";
 import cors from "cors";
+import { GraphQLError } from "graphql";
 
 export function bootstrap(app: Express, express: any) {
   app.use(express.json());
@@ -23,6 +26,20 @@ export function bootstrap(app: Express, express: any) {
   app.use("/comment", commentRouter);
   // chat
   app.use("/chat",chatRouter)
+  app.all("/graphql",createHandler({schema,
+    formatError:(error:GraphQLError)=>{
+    return {
+      message:error.message,
+      success:false,
+      path:error.path,
+      errorDetails:error.originalError
+    }as unknown as GraphQLError
+  },context:(req)=>{
+    const token = req.headers["authorization"]
+    return {
+      token
+    }
+  }}))
 
   app.use("/{*dummy}", (req, res, next) => {
     return res.status(200).json({ message: "invalid router", success: false });

@@ -5,6 +5,7 @@ import {
   IUser,
   SYS_ROLE,
   USER_AGENT,
+  USER_STATUSES,
 } from "../../utils";
 export const userSchema = new Schema<IUser>(
   {
@@ -72,7 +73,12 @@ export const userSchema = new Schema<IUser>(
     },
     friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
     friendRequests: [{ type: Schema.Types.ObjectId, ref: "User" }],
-    userBlock:[{type:Schema.Types.ObjectId,ref:"User"}]
+    userBlock: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    userStatues: {
+      type: Number,
+      enum: USER_STATUSES,
+      default: USER_STATUSES.offline,
+    },
   },
   {
     timestamps: true,
